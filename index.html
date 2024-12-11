@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alphonse Otieno - 3D Model Showcase for Engineering 1216</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh; /* Ensure full-height layout */
+            color: #000;
+        }
+    
+        #logo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffffff;
+            z-index: 10;
+        }
+    
+        #main-container {
+            display: flex;
+            flex: 1;
+            flex-direction: row; /* Arrange items horizontally */
+            align-items: center;
+            justify-content: space-around;
+            height: 100%; /* Fill the viewport */
+            color: #000;
+        }
+    
+        #model-container {
+            width: 50%; /* Take half the viewport width */
+            height: 100%;
+        }
+    
+        .hero {
+            width: 50%; /* Take half the viewport width */
+            height: 100%;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000; /* Background for contrast */
+        }
+    
+        .column-left h1 {
+            font-size: xx-large;
+            color: rgb(184, 184, 184);
+            text-align: left;
+        }
+    </style>
+    
+</head>
+<body>
+    <div id="logo">Alphonse Otieno - 3d model showcase for Engineering 1216</div>
+    <div id="model-container"></div>
+    <section class="hero">
+        <div class="hero-container">
+            <div class="column-left">
+                <h1>I leanred to make 3d models in Engineering. I used the engineering processes we learned to execute the vision.<pre></pre></h1>
+            </div>
+        </div>
+    </section>
+    <body bgcolor="black">
+</body>
+    <script>
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('model-container').appendChild(renderer.domElement);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.25); // White light, half intensity, ambient
+        scene.add(ambientLight);
+
+        const loader = new THREE.STLLoader();
+        loader.load('Assembly 2 scaled down (2 in long).stl', function (geometry) {
+            const material = new THREE.MeshPhongMaterial({ color: 0xAAAAAA, specular: 0x111111, shininess: 200 });
+            const mesh = new THREE.Mesh(geometry, material);
+
+            // Re-center the geometry
+            geometry.center();
+
+            // Adjust scale if necessary
+            mesh.scale.set(0.1, 0.1, 0.1); // Scale down if the model is too large
+
+            scene.add(mesh);
+
+            const boundingBox = new THREE.Box3().setFromObject(mesh);
+            const center = boundingBox.getCenter(new THREE.Vector3());
+            const size = boundingBox.getSize(new THREE.Vector3());
+
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const fov = camera.fov * (Math.PI / 180);
+            let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2));
+            camera.position.z = cameraZ * 1.5;
+
+            const minZ = boundingBox.min.z;
+            const cameraToFarEdge = (minZ < 0) ? -minZ + cameraZ : cameraZ - minZ;
+
+            camera.far = cameraToFarEdge * 3;
+            camera.updateProjectionMatrix();
+
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.25;
+            controls.enableZoom = true;
+
+            const light = new THREE.DirectionalLight(0xffffff, 1);
+            light.position.set(0, 0, 1);
+            scene.add(light);
+
+            function animate() {
+                requestAnimationFrame(animate);
+                controls.update();
+                renderer.render(scene, camera);
+            }
+            animate();
+        });
+                
+        window.addEventListener('resize', function() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }, false);
+    </script>
+
+</html>
